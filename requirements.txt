@@ -1,0 +1,13 @@
+playwright==1.45.1
+beautifulsoup4==4.12.3  # <-- ADD for parsing HTML
+transformers==4.41.2    # <-- Use a more recent version
+trl==0.8.6              # <-- Use a more recent version
+torch>=2.1.0
+accelerate>=0.30.1      # <-- ADD for device mapping
+bitsandbytes>=0.43.1    # <-- ADD for 4-bit quantization
+peft>=0.10.0            # <-- ADD for LoRA
+chromadb==0.5.0
+sentence-transformers==2.7.0
+numpy<2.0.0,>=1.22.5 
+pyttsx3==2.90
+flask==3.0.3
