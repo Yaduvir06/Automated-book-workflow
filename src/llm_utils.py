@@ -7,7 +7,7 @@ logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 def load_standard_model(model_name: str = "microsoft/Phi-3-mini-4k-instruct"):
-    """Load Phi-3 model without quantization - RTX 4060 optimized"""
+    """Load Phi-3 model without quantization'"""
     
     # Check CUDA availability
     if not torch.cuda.is_available():
