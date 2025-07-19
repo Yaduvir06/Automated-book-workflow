@@ -126,6 +126,13 @@ automated_book_workflow/
 ├── requirements.txt             # Python dependencies
 └── README.md                    # This file
 ```
+IMPORTANT:
+After PPO training completes, update your src/llm_utils.py to use the final model:
+
+python
+# Update src/llm_utils.py to use the final PPO model
+def load_standard_model(model_name: str = "../data/models/ppo_policy"):  # Use PPO model
+    # ... rest of your model loading code
 
 ## 🎯 **API Endpoints**
 
