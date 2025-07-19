@@ -11,8 +11,7 @@ import os
 import json
 
 def load_model_for_training(model_name: str = "microsoft/Phi-3-mini-4k-instruct"):
-    """Load and quantize model for 4-bit training with LoRA - Fixed gradient setup"""
-    print("Loading model with 4-bit quantization...")
+    
     
     tokenizer = AutoTokenizer.from_pretrained(model_name, trust_remote_code=True)
     if tokenizer.pad_token is None:
@@ -39,8 +38,6 @@ def load_model_for_training(model_name: str = "microsoft/Phi-3-mini-4k-instruct"
     print("Preparing model for k-bit training...")
     model = prepare_model_for_kbit_training(model)
     
-    # DON'T enable gradient checkpointing for quantized models - causes issues
-    # model.gradient_checkpointing_enable()  # COMMENTED OUT
 
     # LoRA config
     peft_config = LoraConfig(
@@ -56,27 +53,25 @@ def load_model_for_training(model_name: str = "microsoft/Phi-3-mini-4k-instruct"
         inference_mode=False
     )
     
-    # Apply LoRA to prepared model
+   
     print("Adding LoRA adapters...")
     model = get_peft_model(model, peft_config)
-    
-    # Ensure model is in training mode
+  
     model.train()
     
-    # Explicitly enable gradients for LoRA parameters
+   # enable gradients for LoRA paramatrs
     for name, param in model.named_parameters():
         if 'lora_' in name:
             param.requires_grad = True
             print(f"Enabled gradients for: {name}")
     
-    # Print trainable parameters
+    # Print trainable paramaters
     model.print_trainable_parameters()
     
     return tokenizer, model
 
 class SimpleDataset(torch.utils.data.Dataset):
-    """Simple custom dataset that handles tokenization properly"""
-    
+  
     def __init__(self, texts, tokenizer, max_length=384):  # Reduced max_length
         self.texts = texts
         self.tokenizer = tokenizer
@@ -88,7 +83,7 @@ class SimpleDataset(torch.utils.data.Dataset):
     def __getitem__(self, idx):
         text = self.texts[idx]
         
-        # Tokenize the text
+        # Tokenizing the text
         encoding = self.tokenizer(
             text,
             truncation=True,
@@ -97,7 +92,7 @@ class SimpleDataset(torch.utils.data.Dataset):
             return_tensors="pt"
         )
         
-        # Extract the tensors and remove the batch dimension
+        # Extracting the tensors and remove the batch dimension
         input_ids = encoding["input_ids"].squeeze()
         attention_mask = encoding["attention_mask"].squeeze()
         
@@ -165,19 +160,19 @@ def train_sft_manual(
     
     print(f"Formatted {len(formatted_texts)} training examples")
     
-    # Create dataset with smaller max_length
+    # Creating dataset with smaller max_length
     train_dataset = SimpleDataset(formatted_texts, tokenizer, max_length=384)
     
-    # Create output directory
+    # Creating output directory
     os.makedirs(output_dir, exist_ok=True)
 
     # Training arguments - optimized for quantized + LoRA
     training_args = TrainingArguments(
         output_dir=output_dir,
         per_device_train_batch_size=1,
-        gradient_accumulation_steps=2,  # Reduced
-        max_steps=10,  # Reduced for testing
-        learning_rate=1e-4,  # Slightly lower for stability
+        gradient_accumulation_steps=2, 
+        max_steps=10, 
+        learning_rate=1e-4,  
         fp16=True,
         logging_steps=1,
         save_strategy="steps",
@@ -191,14 +186,14 @@ def train_sft_manual(
         remove_unused_columns=False,
         label_names=["labels"],
         prediction_loss_only=True,
-        # Important: disable gradient checkpointing in training args
+        
         gradient_checkpointing=False,
-        # Disable some optimizations that can cause issues
+        
         dataloader_pin_memory=False,
         group_by_length=False,
     )
 
-    # Initialize trainer
+    # Initializing trainer
     print("Initializing trainer...")
     trainer = Trainer(
         model=model,
@@ -206,7 +201,7 @@ def train_sft_manual(
         train_dataset=train_dataset,
     )
 
-    # Verify gradients are enabled
+    # Verifying gradients are enabledd
     print("Checking gradient setup...")
     trainable_params = []
     for name, param in model.named_parameters():
@@ -236,9 +231,7 @@ def train_sft_manual(
     
     print(f"Training complete. Model saved to {output_dir}")
     
-    # Print final memory usage
-    if torch.cuda.is_available():
-        print(f"Final GPU memory usage: {torch.cuda.memory_allocated() / 1024**3:.2f} GB")
+  
 
 if __name__ == "__main__":
     train_sft_manual()
