@@ -23,14 +23,13 @@ def load_standard_model(model_name: str = "microsoft/Phi-3-mini-4k-instruct"):
         trust_remote_code=True
     )
     
-    # Load model without quantization - using standard approach
     model = AutoModelForCausalLM.from_pretrained(
         model_name,
-        torch_dtype=torch.float16,  # Half precision for memory efficiency
+        torch_dtype=torch.float16, 
         trust_remote_code=True,
-        device_map=device_map,      # This works fine for non-quantized models
+        device_map=device_map,      
         low_cpu_mem_usage=True,
-        attn_implementation="eager"  # Avoid flash attention issues
+        attn_implementation="eager"  
     )
     
     # Add pad token if missing
@@ -40,7 +39,7 @@ def load_standard_model(model_name: str = "microsoft/Phi-3-mini-4k-instruct"):
     logger.info("Model loaded successfully without quantization")
     return tokenizer, model
 
-# Load the model and tokenizer once when the module is imported
+
 tokenizer, model = load_standard_model()
 
 def generate_text(prompt: str, max_length: int = 512) -> str:
@@ -67,7 +66,7 @@ def generate_text(prompt: str, max_length: int = 512) -> str:
     # Move inputs to model device
     inputs = {k: v.to(model.device) for k, v in inputs.items()}
     
-    # Generate with memory-efficient settings
+    
     with torch.no_grad():
         outputs = model.generate(
             **inputs,
@@ -78,7 +77,7 @@ def generate_text(prompt: str, max_length: int = 512) -> str:
             pad_token_id=tokenizer.eos_token_id,
             eos_token_id=tokenizer.eos_token_id,
             repetition_penalty=1.1,
-            use_cache=True  # Enable KV cache for efficiency
+            use_cache=True  
         )
     
     # Decode only the new tokens
