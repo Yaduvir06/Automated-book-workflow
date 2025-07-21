@@ -92,15 +92,18 @@ graph TB
 
 2. **Process your first chapter**
    ```bash
-   curl -X POST http://localhost:5000/spin \
-     -H "Content-Type: application/json" \
-     -d '{"url": "https://en.wikisource.org/wiki/The_Gates_of_Morning/Book_1/Chapter_1"}'
+   curl -X POST http://localhost:5000/spin \-H "Content-Type: application/json" -d "{"url": "https://en.wikisource.org/wiki/The_Gates_of_Morning/Book_1/Chapter_1"}"
    ```
 
 3. **Search processed content**
    ```bash
    curl "http://localhost:5000/search?q=chapter%20opening"
    ```
+4.**Make better prompts examples:**
+```bash
+
+curl -X POST http://localhost:5000/feedback -H "Content-Type: application/json" -d "{\"prompt\": \"Rewrite this chapter opening:\", \"good\": \"The morning mist clung to ancient stones, whispering secrets of forgotten times.\", \"bad\": \"It was morning and there was mist on some stones.\"}"
+```
 
 ## 📁 **Project Structure**
 
